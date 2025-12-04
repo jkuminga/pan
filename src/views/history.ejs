@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전적</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --muted: #94a3b8;
+            --text: #e2e8f0;
+            --accent: #38bdf8;
+            --danger: #f472b6;
+            --success: #34d399;
+            --border: #1f2937;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(120% 120% at 20% 20%, #0b1224, #0f172a 60%, #0b1020);
+            color: var(--text);
+            font-family: "Pretendard", "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+        .page {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        header.top-bar {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        header.top-bar h1 {
+            text-align: center;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .add-btn {
+            justify-self: end;
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, #1e293b, #111827);
+            color: var(--text);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.1s ease, border-color 0.2s ease;
+            align-content: center;
+            justify-content: center;
+        }
+        .add-btn:hover { transform: translateY(-2px); border-color: var(--accent);  }
+        .search-panel {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            margin-bottom: 18px;
+        }
+        .search-panel input, .search-panel select, .search-panel button {
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #0b1220;
+            color: var(--text);
+            padding: 0 12px;
+            font-size: 14px;
+        }
+        .search-panel input, .search-panel select { flex: 1; min-width: 0; }
+        .search-panel button {
+            flex: 0 0 auto;
+            background: linear-gradient(135deg, #38bdf8, #22d3ee);
+            border: none;
+            color: #0b1220;
+            font-weight: 700;
+            cursor: submit;
+            padding: 0 16px;
+        }
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+        .card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+        }
+        .pill.win-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
+        .pill.win-red { background: rgba(244, 114, 182, 0.15); color: var(--danger); }
+        .pill.stake { background: rgba(52, 211, 153, 0.12); color: var(--success); }
+        .teams {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 10px;
+        }
+        .team {
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(12, 18, 32, 0.8);
+        }
+        .team h4 {
+            margin: 0 0 8px 0;
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+        .players {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 6px;
+        }
+        .player {
+            padding: 8px 6px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #0b1220;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text);
+        }
+        .empty {
+            padding: 18px;
+            text-align: center;
+            color: var(--muted);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            background: rgba(17, 24, 39, 0.6);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        .stat-card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        }
+        .stat-card h3 { margin: 0 0 10px 0; letter-spacing: 0.4px; }
+        .stat-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .stat-table th, .stat-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .stat-table th {
+            text-align: left;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .stat-table td { color: var(--text); }
+        .stat-table tr:last-child td { border-bottom: none; }
+        .text-right { text-align: right; }
+        @media (max-width: 640px) {
+            .search-panel { flex-direction: column; }
+            header.top-bar { grid-template-columns: auto 1fr auto; }
+            .players { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="top-bar">
+            <div></div>
+            <h1>전적</h1>
+            <!-- <button type="button" class="add-btn">+</button> -->
+            <a href="/history/form" class="add-btn">추가</a>
+        </header>
+
+        <form class="search-panel" action="/history/search" method="post">
+            <input type="text" name="keyword" placeholder="검색어 (팀/플레이어/메모 등)">
+            <select name="date">
+                <option value="">전체 날짜</option>
+                <% (dates || []).forEach((d) => { %>
+                    <option value="<%= d %>"><%= d %></option>
+                <% }) %>
+            </select>
+            <button type="submit">검색</button>
+        </form>
+
+        <section class="list">
+            <% const historiesSafe = histories || []; %>
+            <% if (historiesSafe.length === 0) { %>
+                <div class="empty">전적이 없습니다. 검색 조건을 바꾸거나 새 전적을 추가해 보세요.</div>
+            <% } %>
+
+            <% historiesSafe.forEach((h) => { %>
+                <% const dateText = (h.created_at || '').split('T')[0] || '-'; %>
+                <% const winLabel = (h.win || '').toString().toUpperCase(); %>
+                <% const winClass = winLabel === 'BLUE' ? 'win-blue' : 'win-red'; %>
+                <% const players = h.players || []; %>
+                <% const blueTeam = []; const redTeam = []; %>
+                <% players.forEach((p) => { %>
+                    <% if (p.side === 'BLUE') { %>
+                        <% blueTeam.push(p); %>
+                    <% } else { %>
+                        <% redTeam.push(p); %>
+                    <% } %>
+                <% }); %>
+                <article class="card">
+                    <div class="card-header">
+                        <div><%= dateText %> · ID #<%= h.id %></div>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <span class="pill <%= winClass %>"><%= winLabel || 'N/A' %></span>
+                            <span class="pill stake">판돈 <%= h.stake ?? '-' %></span>
+                        </div>
+                    </div>
+                    <div class="teams">
+                        <div class="team">
+                            <h4>BLUE</h4>
+                            <div class="players">
+                                <% blueTeam.forEach((k) => { %>
+                                    <span class="player"><%= k['name'] ?? '-' %></span>
+                                <% }) %>
+                            </div>
+                        </div>
+                        <div class="team">
+                            <h4>RED</h4>
+                            <div class="players">
+                                <% redTeam.forEach((k) => { %>
+                                    <span class="player"><%= k['name'] ?? '-' %></span>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            <% }) %>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <h3>승률·수익</h3>
+                <% const rateAndEarningsSafe = rateAndEarnings || []; %>
+                <% if (rateAndEarningsSafe.length === 0) { %>
+                    <div class="empty" style="border:none;background:none;padding:8px 0;">데이터 없음</div>
+                <% } else { %>
+                    <table class="stat-table">
+                        <thead>
+                            <tr>
+                                <th>플레이어</th>
+                                <th class="text-right">게임 수</th>
+                                <th class="text-right">승리</th>
+                                <th class="text-right">패배</th>
+                                <th class="text-right">승률</th>
+                                <th class="text-right">수익</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% rateAndEarningsSafe.forEach((row) => { %>
+                                <tr>
+                                    <td><%= row.name || row.player || '-' %></td>
+                                    <td class="text-right"><%= row.games !== undefined ? row.games + '판' : '-' %></td>
+                                    <td class="text-right"><%= row.wins !== undefined ? row.wins + '판' : '-' %></td>
+                                    <td class="text-right"><%= row.losses !== undefined ? row.losses + '판' : '-' %></td>
+                                    <td class="text-right"><%= row.rate !== undefined ? row.rate + '%' : '-' %></td>
+                                    <td class="text-right"><%= row.earnings ?? '-' %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } %>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
