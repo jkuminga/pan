@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { raw } from 'express';
 import supabase from '../config/db.js'
 import history from "../functions/historyFunctions.js"
 import player from '../functions/playerFunctions.js'
@@ -6,42 +6,11 @@ const router = express.Router();
 
 
 // GET /history : 전체 보여주기(역대 전체 
-router.get('/all', async(req, res)=>{
-    const data= await history.getGameHistories();
-    console.log(data);
-    res.send(data);
-})
-
-router.get('/', async(req, res)=>{
-    try{
-        const histories = await history.getGameHistories();
-        const dates = await history.getHistoryDates();
-        const rateAndEarnings = await history.getWinRateAndEarning();
-        // res.status(200).json(rateAndEarnings);
-        res.status(200).render('history', {histories, dates, rateAndEarnings})
-    }catch(error){
-        console.error(error);
-        res.status(500).json(error);
-    }
-})
-
-// 전적 목록 보기
-router.post('/search', async (req, res)=>{
-    const body = req.body;
-
-    try{
-        const {data, error} = await supabase.rpc('get_game_history').throwOnError();
-
-        console.log(data);
-
-        res.status(200).render("history", data);
-    }catch(error){
-        console.error(error);
-        res.status(500).json(error);
-    }   
-})
-
-
+// router.get('/all', async(req, res)=>{
+//     const data= await history.getGameHistories();
+//     console.log(data);
+//     res.send(data);
+// })
 
 router.get('/form', async (req, res)=>{
     try{
@@ -52,6 +21,66 @@ router.get('/form', async (req, res)=>{
         res.status(500).render('500');
     }
 });
+
+
+router.get('/dates', async(req, res)=>{
+    try{
+        const dates = await history.getHistoryDates();
+        console.log(dates)
+        res.status(200).render('dates', {dates});
+    }catch(error){
+        console.error(error);
+        res.status(500).json(error);
+    }
+
+})
+
+router.get('/:pageNo', async(req, res)=>{
+    const rawPageNo = parseInt(req.params.pageNo);
+    const pageNo = Number.isNaN(rawPageNo) ? 0 :(rawPageNo-1) * 10;
+
+    try{
+        const histories = await history.getGameHistories(pageNo);
+
+        const totalCount = await history.getHistoryCount();
+        const totalPage = Math.ceil(totalCount / 10);
+        
+        const pagination = {
+            pageNo : rawPageNo,
+            totalPage :totalPage,
+            totalCount : totalCount
+        }
+        console.log(pagination);
+        
+        const rateAndEarnings = await history.getWinRateAndEarning();
+
+        res.status(200).render('history', {histories, rateAndEarnings, pagination})
+    }catch(error){
+        console.error(error);
+        res.status(500).json(error);
+    }
+})
+
+
+
+// // 전적 목록 보기
+// router.post('/search', async (req, res)=>{
+//     const body = req.body;
+
+//     try{
+//         const {data, error} = await supabase.rpc('get_game_history').throwOnError();
+
+//         console.log(data);
+
+//         res.status(200).render("history", data);
+//     }catch(error){
+//         console.error(error);
+//         res.status(500).json(error);
+//     }   
+// })
+
+
+
 
 // 새로운 전적 기록
 router.post('/', async(req, res)=>{
@@ -86,30 +115,25 @@ router.post('/', async(req, res)=>{
         }).throwOnError();
 
         console.log('✅ 새 전적 등록 완료');
-        res.status(200).redirect('/history')
+        res.status(200).redirect('/history/1')
     }catch(error){
         console.error('❌ 전적 등록 중 에러 발생', error);
-        res.status(500).render('500');
+        res.status(500).render('500', {error});
     }
-
 })
 
-// // 전적 삭제
-// router.delete('/:historyId', (req, res)=>{
+// 전적 삭제
+router.delete('/:historyId', async(req, res)=>{
+    const id = req.params.historyId;
     
-// })
+    try{
+        const result = await history.deleteHistory(id);
 
-
-// 승률(기간별)
-router.get('/winrate', (req, res)=>{
-
+        res.status(200).json({ok : true});
+    }catch(error){
+        console.error(error);
+        res.status(500).render('500', {error});
+    }  
 })
-
-// 획득 금액(기간별)
-router.get('/moneylist',(req, res)=>{
-
-})
-
-
 
 export default router;

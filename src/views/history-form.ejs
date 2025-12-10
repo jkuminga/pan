@@ -21,6 +21,22 @@
             color: var(--text);
             font-family: "Pretendard", "Segoe UI", system-ui, -apple-system, sans-serif;
         }
+        .add-btn {
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, #1e293b, #111827);
+            color: var(--text);
+            border-radius: 20px;
+            font-size: 12px;
+            padding: 8px 15px;
+            margin: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.1s ease, border-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-btn:hover { transform: translateY(-2px); border-color: var(--accent);  }
         .page { max-width: 900px; margin: 0 auto; padding: 24px; }
         .panel {
             background: rgba(17, 24, 39, 0.9);
@@ -88,6 +104,22 @@
             font-weight: 700;
             cursor: pointer;
         }
+        .submit-row a{
+            height: 44px;
+            margin-right:5px ;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 0 16px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #38bdf8, #22d3ee);
+            color: #0b1220;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
         @media (max-width: 640px) {
             .header { flex-direction: column; align-items: flex-start; gap: 10px; }
             .submit-row { justify-content: stretch; }
@@ -100,6 +132,7 @@
         <form class="panel" action="/history" method="post">
             <div class="header">
                 <h1>전적 입력</h1>
+                <a href="/player/form" class="add-btn">플레이어 추가</a>
             </div>
 
             <input type="hidden" name="win" id="winInput" value="BLUE">
@@ -118,31 +151,31 @@
                         <select name="blue_1" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="blue_2" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="blue_3" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="blue_4" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="blue_5" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                     </div>
@@ -159,31 +192,31 @@
                         <select name="red_1" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="red_2" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="red_3" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="red_4" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%=  p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                         <select name="red_5" class="player-select">
                             <option value="">선택</option>
                             <% playersSafe.forEach((p) => { %>
-                                <option value="<%= p.id %>"><%= p.name %></option>
+                                <option value="<%= p.id %>"><%= p.id + '. ' + p.name %></option>
                             <% }) %>
                         </select>
                     </div>
@@ -196,6 +229,7 @@
             </div>
 
             <div class="submit-row">
+                <a href="/history/1">취소</a>
                 <button type="submit">전적 추가</button>
             </div>
         </form>

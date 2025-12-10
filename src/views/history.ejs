@@ -40,19 +40,36 @@
             margin: 0;
             letter-spacing: 1px;
         }
-        .add-btn {
-            justify-self: end;
+        .menu-btn{
+            justify-self : end; 
             border: 1px solid var(--border);
             background: linear-gradient(135deg, #1e293b, #111827);
             color: var(--text);
-            width: 42px;
             height: 42px;
-            border-radius: 12px;
+            border-radius: 20px;
             font-size: 12px;
+            padding: 8px 15px;
             cursor: pointer;
             text-decoration: none;
             transition: transform 0.1s ease, border-color 0.2s ease;
-            align-content: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-btn:hover { transform: translateY(-2px); border-color: var(--accent);  }
+        .add-btn {
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, #1e293b, #111827);
+            color: var(--text);
+            border-radius: 20px;
+            font-size: 12px;
+            padding: 8px 15px;
+            margin: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.1s ease, border-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
         }
         .add-btn:hover { transform: translateY(-2px); border-color: var(--accent);  }
@@ -98,6 +115,7 @@
             border-radius: 16px;
             padding: 14px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
         }
         .card-header {
             display: flex;
@@ -116,8 +134,6 @@
             font-size: 12px;
             letter-spacing: 0.3px;
         }
-        .pill.win-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
-        .pill.win-red { background: rgba(244, 114, 182, 0.15); color: var(--danger); }
         .pill.stake { background: rgba(52, 211, 153, 0.12); color: var(--success); }
         .teams {
             display: grid;
@@ -129,6 +145,16 @@
             border-radius: 12px;
             padding: 10px;
             background: rgba(12, 18, 32, 0.8);
+        }
+        .team.win-blue {
+            border: 1px solid var(--border);
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+        .team.win-red {
+            border: 1px solid var(--border);
+            background: rgba(244, 114, 182, 0.15);
+            border-color: rgba(244, 114, 182, 0.4);
         }
         .team h4 {
             margin: 0 0 8px 0;
@@ -179,6 +205,7 @@
         .stat-table th, .stat-table td {
             padding: 10px 8px;
             border-bottom: 1px solid var(--border);
+            vertical-align: middle;
         }
         .stat-table th {
             text-align: left;
@@ -188,35 +215,153 @@
         }
         .stat-table td { color: var(--text); }
         .stat-table tr:last-child td { border-bottom: none; }
-        .text-right { text-align: right; }
         @media (max-width: 640px) {
             .search-panel { flex-direction: column; }
             header.top-bar { grid-template-columns: auto 1fr auto; }
             .players { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
+        .pagination {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        /* 삭제 확인 팝업 */
+        .confirm-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(17, 24, 39, 0.98);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+            display: none;
+            z-index: 5;
+        }
+        .confirm-popup.active { display: grid; gap: 10px; }
+        .confirm-popup .actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .confirm-popup button {
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #0b1220;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .page-btn{
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 360px;
+            padding: 10px;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.1s ease, border-color 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        }
+        .page-btn.current{
+            background-color: rgba(43, 45, 110, 0.551);
+        }
+        .page-btn:hover{
+            transform: translateY(-2px); border-color: var(--accent);
+        }
     </style>
+    <script>
+        // 카드 더블클릭/롱프레스 시 삭제 확인 팝업
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = Array.from(document.querySelectorAll('.card'));
+            cards.forEach((card) => {
+                const popup = card.querySelector('.confirm-popup');
+                const okBtn = popup?.querySelector('.ok');
+                const cancelBtn = popup?.querySelector('.cancel');
+                let timer;
+
+                const showPopup = () => popup?.classList.add('active');
+                const hidePopup = () => popup?.classList.remove('active');
+
+                const startPress = () => { timer = setTimeout(showPopup, 600); };
+                const cancelPress = () => clearTimeout(timer);
+
+                card.addEventListener('dblclick', showPopup);
+                card.addEventListener('mousedown', startPress);
+                card.addEventListener('touchstart', startPress);
+
+                ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => {
+                    card.addEventListener(evt, cancelPress);
+                });
+
+                cancelBtn?.addEventListener('click', hidePopup);
+                okBtn?.addEventListener('click', async () => {
+                    hidePopup();
+                    const historyId = card.dataset.historyId;
+                    try{
+                        const resp = await fetch(`/history/${historyId}`, {
+                            method: 'DELETE',
+                        });
+                        if(!resp.ok) throw new Error('delete failed');
+                        // 서버가 { ok: true } 등을 반환한다고 가정하고 새로고침으로 동기화
+                        await resp.json().catch(() => ({}));
+                        location.reload();
+                    }catch(err){
+                        console.error(err);
+                        alert('삭제 요청에 실패했습니다.');
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="page">
         <header class="top-bar">
             <div></div>
             <h1>전적</h1>
-            <!-- <button type="button" class="add-btn">+</button> -->
-            <a href="/history/form" class="add-btn">추가</a>
+            <a href="/history/dates" class="menu-btn">날짜별 전적 보기</a>
         </header>
 
-        <form class="search-panel" action="/history/search" method="post">
-            <input type="text" name="keyword" placeholder="검색어 (팀/플레이어/메모 등)">
-            <select name="date">
-                <option value="">전체 날짜</option>
-                <% (dates || []).forEach((d) => { %>
-                    <option value="<%= d %>"><%= d %></option>
-                <% }) %>
-            </select>
-            <button type="submit">검색</button>
-        </form>
+        <section class="stats">
+            <div class="stat-card">
+                <h3>Stats</h3>
+                <% const rateAndEarningsSafe = rateAndEarnings || []; %>
+                <% if (rateAndEarningsSafe.length === 0) { %>
+                    <div class="empty" style="border:none;background:none;padding:8px 0;">데이터 없음</div>
+                <% } else { %>
+                    <table class="stat-table">
+                        <thead>
+                            <tr>
+                                <th>플레이어</th>
+                                <th class="text-right">게임 수</th>
+                                <th class="text-right">승리</th>
+                                <th class="text-right">패배</th>
+                                <th class="text-right">승률</th>
+                                <th class="text-right">수익</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% rateAndEarningsSafe.forEach((row) => { %>
+                                <% const winrate = (row.wins/row.games) * 100 %>
+                                <tr>
+                                    <td style="font-weight: bold;"><%= row.name || row.player || '-' %></td>
+                                    <td class="text-right"><%= row.games !== undefined ? row.games + '판' : '-' %></td>
+                                    <td class="text-right"><%= row.wins !== undefined ? row.wins + '승' : '-' %></td>
+                                    <td class="text-right"><%= row.losses !== undefined ? row.losses + '패' : '-' %></td>
+                                    <td class="text-right"><%= !Number.isNaN(winrate) ? Number(winrate).toFixed(1)  + '%' : '-'  %></td>
+                                    <td class="text-right"><%= row.earnings + "원" ?? '-' %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } %>
+            </div>
+        </section>
+        <br/>
 
         <section class="list">
+            <div style="display: flex;">
+                <h3>History</h1>
+                <a href="/history/form" class="add-btn">추가</a>
+            </div>
+            
             <% const historiesSafe = histories || []; %>
             <% if (historiesSafe.length === 0) { %>
                 <div class="empty">전적이 없습니다. 검색 조건을 바꾸거나 새 전적을 추가해 보세요.</div>
@@ -235,16 +380,16 @@
                         <% redTeam.push(p); %>
                     <% } %>
                 <% }); %>
-                <article class="card">
+                <article class="card" data-history-id="<%= h.id %>">
                     <div class="card-header">
                         <div><%= dateText %> · ID #<%= h.id %></div>
                         <div style="display:flex; gap:6px; align-items:center;">
-                            <span class="pill <%= winClass %>"><%= winLabel || 'N/A' %></span>
-                            <span class="pill stake">판돈 <%= h.stake ?? '-' %></span>
+                            <!-- <span class="pill <%= winClass %>"><%= winLabel || 'N/A' %></span> -->
+                            <span class="pill stake"><%= h.stake + '원' ?? '-' %></span>
                         </div>
                     </div>
                     <div class="teams">
-                        <div class="team">
+                        <div class="team <%= winLabel === 'BLUE' ? 'win-blue' : '' %>">
                             <h4>BLUE</h4>
                             <div class="players">
                                 <% blueTeam.forEach((k) => { %>
@@ -252,7 +397,7 @@
                                 <% }) %>
                             </div>
                         </div>
-                        <div class="team">
+                        <div class="team <%= winLabel === 'RED' ? 'win-red' : '' %>">
                             <h4>RED</h4>
                             <div class="players">
                                 <% redTeam.forEach((k) => { %>
@@ -261,44 +406,30 @@
                             </div>
                         </div>
                     </div>
+                    <div class="confirm-popup">
+                        <div style="font-weight:700;">삭제하시겠습니까?</div>
+                        <div class="actions">
+                            <button type="button" class="cancel">X</button>
+                            <button type="button" class="ok">O</button>
+                        </div>
+                    </div>
                 </article>
             <% }) %>
         </section>
-
-        <section class="stats">
-            <div class="stat-card">
-                <h3>승률·수익</h3>
-                <% const rateAndEarningsSafe = rateAndEarnings || []; %>
-                <% if (rateAndEarningsSafe.length === 0) { %>
-                    <div class="empty" style="border:none;background:none;padding:8px 0;">데이터 없음</div>
-                <% } else { %>
-                    <table class="stat-table">
-                        <thead>
-                            <tr>
-                                <th>플레이어</th>
-                                <th class="text-right">게임 수</th>
-                                <th class="text-right">승리</th>
-                                <th class="text-right">패배</th>
-                                <th class="text-right">승률</th>
-                                <th class="text-right">수익</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% rateAndEarningsSafe.forEach((row) => { %>
-                                <tr>
-                                    <td><%= row.name || row.player || '-' %></td>
-                                    <td class="text-right"><%= row.games !== undefined ? row.games + '판' : '-' %></td>
-                                    <td class="text-right"><%= row.wins !== undefined ? row.wins + '판' : '-' %></td>
-                                    <td class="text-right"><%= row.losses !== undefined ? row.losses + '판' : '-' %></td>
-                                    <td class="text-right"><%= row.rate !== undefined ? row.rate + '%' : '-' %></td>
-                                    <td class="text-right"><%= row.earnings ?? '-' %></td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                <% } %>
-            </div>
-        </section>
+        <div class="pagination">
+            <% const safePagination = pagination || {}; %>
+            <% const pageNo = safePagination.pageNo || 1 %>
+            <% const totalPage = safePagination.totalPage || 1 %>
+            <% if(pageNo >= 10){ %>
+            <button class="page-btn"><</button>
+            <% } %>
+            <% for(var i = 1; i <= totalPage ; i++){ %>
+                <a class="page-btn <%= i === pageNo ? 'current' : ''%>" href="/history/<%= i %>"><%= i %></a>
+            <% } %>
+            <% if(totalPage >= 10) { %>
+            <a href="/history/<%= pageNo +1%>" class="page-btn">></a>
+            <% } %>
+        </div>
     </div>
 </body>
 </html>

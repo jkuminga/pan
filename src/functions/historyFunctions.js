@@ -1,9 +1,9 @@
 import supabase from "../config/db.js";
 
 export default {
-    getGameHistories :  async()=>{
+    getGameHistories :  async(pageNo)=>{
         try{
-            const {data} = await supabase.rpc('get_game_history').throwOnError();
+            const {data} = await supabase.rpc('get_game_history', {page_no : pageNo}).throwOnError();
             return data;
         }catch(error){
             console.error(error);
@@ -27,6 +27,30 @@ export default {
             return data;
         }catch(error){
             console.log(error);
+            throw error;
+        }
+    },
+
+    getHistoryCount : async()=>{
+        try{
+            const {data} = await supabase.rpc('get_pagination_info').throwOnError();
+
+            return data;
+        }catch(error){
+            console.error(error);
+            throw error;
+        }
+    },
+
+    deleteHistory : async (id)=>{
+        try{
+            await supabase.from('history').delete().eq('id', id);
+
+            console.log('삭제 완료')
+
+            return true;
+        }catch(error){
+            console.error(error);
             throw error;
         }
     }
