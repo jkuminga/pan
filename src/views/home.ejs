@@ -5,8 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAN.GG</title>
     <style>
+        :root {
+            --bg: #F3FDFA;
+            --text: #1f2a33;
+            --brand: #045CBD;
+            --btn-bg: #045CBD;
+            --btn-text: #ffffff;
+        }
+        html[data-theme="night"] {
+            --bg: #0E1424;
+            --text: #E8EDF5;
+            --brand: #6AA6FF;
+            --btn-bg: #6AA6FF;
+            --btn-text: #0B1020;
+        }
         body{
-            background-color: #F3FDFA;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
             /* background-image: url("title.png");
             background-size: cover;
             background-position: center;
@@ -18,8 +35,8 @@
         }
         
         a {
-            background-color: #045CBD;
-            color: white;
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
             border-radius: 45px;
             text-decoration: none;
             font-weight: bold;
@@ -40,11 +57,28 @@
         .header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 12px 20px;
         }
         .header img {
             height: 36px;
             width: auto;
+            border-radius: 20px;
+        }
+        .theme-toggle {
+            border: 0;
+            border-radius: 999px;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            font-weight: bold;
+            font-size: 18px;
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .nav {
             display: flex;
@@ -52,7 +86,7 @@
         }
         .title_text{
             width: 300px;
-            border: 8px solid #045CBD ;
+            border: 8px solid var(--brand);
             border-radius: 200px;
             margin-bottom: 100px;
         }
@@ -69,6 +103,7 @@
 <body>
     <header class="header">
         <img src="/title.png" alt="PAN.GG">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to night mode">☾</button>
     </header>
     <div class="snowflakes" aria-hidden="true">
         <div class="snowflake">
@@ -105,5 +140,32 @@
             <a>랜덤</a>
         </div>
     </div>
+    <script>
+        (function () {
+            var root = document.documentElement;
+            var button = document.getElementById("themeToggle");
+            var stored = localStorage.getItem("theme");
+            if (stored === "night") {
+                root.setAttribute("data-theme", "night");
+            }
+            var isNightInit = root.getAttribute("data-theme") === "night";
+            button.textContent = isNightInit ? "☀" : "☾";
+            button.setAttribute("aria-label", isNightInit ? "Switch to day mode" : "Switch to night mode");
+            button.addEventListener("click", function () {
+                var isNight = root.getAttribute("data-theme") === "night";
+                if (isNight) {
+                    root.removeAttribute("data-theme");
+                    localStorage.setItem("theme", "day");
+                    button.textContent = "☾";
+                    button.setAttribute("aria-label", "Switch to night mode");
+                } else {
+                    root.setAttribute("data-theme", "night");
+                    localStorage.setItem("theme", "night");
+                    button.textContent = "☀";
+                    button.setAttribute("aria-label", "Switch to day mode");
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
